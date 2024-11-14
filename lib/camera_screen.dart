@@ -1,21 +1,37 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key, required this.title});
+import 'global.dart';
 
-  final String title;
+class CameraScreen extends StatefulWidget {
+  const CameraScreen({super.key});
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  int _counter = 0;
+  late CameraController cameraController;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
+  @override
+  void initState() {
+    super.initState();
+    cameraController = CameraController(
+      cameras[0],
+      ResolutionPreset.max,
+    );
+    cameraController.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
     });
+  }
+
+  @override
+  void dispose() {
+    cameraController.dispose();
+    super.dispose();
   }
 
   @override
@@ -23,26 +39,13 @@ class _CameraScreenState extends State<CameraScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text('Camera Example'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CameraPreview(cameraController),
+        ],
       ),
     );
   }
