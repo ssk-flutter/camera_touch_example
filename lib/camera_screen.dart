@@ -44,7 +44,21 @@ class _CameraScreenState extends State<CameraScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CameraPreview(cameraController),
+          CameraPreview(
+            cameraController,
+            child: LayoutBuilder(
+              builder: (context, constraints) => GestureDetector(
+                onTapDown: (details) {
+                  final offset = Offset(
+                    details.localPosition.dx / constraints.maxWidth,
+                    details.localPosition.dy / constraints.maxHeight,
+                  );
+                  cameraController.setExposurePoint(offset);
+                  cameraController.setFocusPoint(offset);
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
