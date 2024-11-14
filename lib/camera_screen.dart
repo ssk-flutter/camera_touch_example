@@ -15,6 +15,7 @@ class _CameraScreenState extends State<CameraScreen> {
   late CameraController cameraController;
   Offset? _tapPosition;
   Timer? _timer;
+  double _circleOpacity = 1.0;
 
   @override
   void initState() {
@@ -64,13 +65,21 @@ class _CameraScreenState extends State<CameraScreen> {
 
                       setState(() {
                         _tapPosition = details.localPosition;
+                        _circleOpacity = 1.0; // 초기 불투명도 설정
                       });
 
-                      // 3초 뒤에 동그라미를 사라지게 함
+                      // 3초 동안 점차 사라지게 설정
                       _timer?.cancel(); // 이전 타이머 취소
                       _timer = Timer(Duration(seconds: 3), () {
                         setState(() {
                           _tapPosition = null;
+                        });
+                      });
+
+                      // 애니메이션을 통해 서서히 사라짐
+                      Future.delayed(Duration(milliseconds: 500), () {
+                        setState(() {
+                          _circleOpacity = 0.0;
                         });
                       });
                     },
@@ -78,9 +87,13 @@ class _CameraScreenState extends State<CameraScreen> {
                 ),
               ),
               if (_tapPosition != null)
-                CustomPaint(
-                  painter: CirclePainter(_tapPosition!),
-                  child: Container(),
+                AnimatedOpacity(
+                  opacity: _circleOpacity,
+                  duration: Duration(seconds: 3), // 애니메이션 지속 시간
+                  child: CustomPaint(
+                    painter: CirclePainter(_tapPosition!),
+                    child: Container(),
+                  ),
                 ),
             ],
           ),
@@ -99,8 +112,7 @@ class CirclePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.yellow
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..style = PaintingStyle.fill;
 
     canvas.drawCircle(position, 20, paint);
   }
