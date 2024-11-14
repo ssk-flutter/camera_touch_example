@@ -12,6 +12,7 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController cameraController;
+  Offset? _tapPosition;
 
   @override
   void initState() {
@@ -44,23 +45,55 @@ class _CameraScreenState extends State<CameraScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CameraPreview(
-            cameraController,
-            child: LayoutBuilder(
-              builder: (context, constraints) => GestureDetector(
-                onTapDown: (details) {
-                  final offset = Offset(
-                    details.localPosition.dx / constraints.maxWidth,
-                    details.localPosition.dy / constraints.maxHeight,
-                  );
-                  cameraController.setExposurePoint(offset);
-                  cameraController.setFocusPoint(offset);
-                },
+          Stack(
+            children: [
+              CameraPreview(
+                cameraController,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => GestureDetector(
+                    onTapDown: (details) {
+                      final offset = Offset(
+                        details.localPosition.dx / constraints.maxWidth,
+                        details.localPosition.dy / constraints.maxHeight,
+                      );
+                      cameraController.setExposurePoint(offset);
+                      cameraController.setFocusPoint(offset);
+
+                      setState(() {
+                        _tapPosition = details.localPosition;
+                      });
+                    },
+                  ),
+                ),
               ),
-            ),
+              if (_tapPosition != null)
+                CustomPaint(
+                  painter: CirclePainter(_tapPosition!),
+                  child: Container(),
+                ),
+            ],
           ),
         ],
       ),
     );
   }
+}
+
+class CirclePainter extends CustomPainter {
+  final Offset position;
+
+  CirclePainter(this.position);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.yellow
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    canvas.drawCircle(position, 20, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
