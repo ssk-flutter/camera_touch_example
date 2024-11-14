@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController cameraController;
   Offset? _tapPosition;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void dispose() {
     cameraController.dispose();
+    _timer?.cancel(); // 타이머가 있을 경우 해제
     super.dispose();
   }
 
@@ -61,6 +64,14 @@ class _CameraScreenState extends State<CameraScreen> {
 
                       setState(() {
                         _tapPosition = details.localPosition;
+                      });
+
+                      // 3초 뒤에 동그라미를 사라지게 함
+                      _timer?.cancel(); // 이전 타이머 취소
+                      _timer = Timer(Duration(seconds: 3), () {
+                        setState(() {
+                          _tapPosition = null;
+                        });
                       });
                     },
                   ),
